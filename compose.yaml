@@ -1,0 +1,13 @@
+﻿services:
+  employeemanagementsystem.api:
+    image: employeemanagementsystem.api
+    build:
+      context: .
+      dockerfile: EmployeeManagementSystem.Api/Dockerfile
+
+  employeemanagementsystem.web:
+    image: employeemanagementsystem.web
+    build:
+      context: .
+      dockerfile: EmployeeManagementSystem.Web/Dockerfile
+
