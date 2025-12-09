@@ -1,0 +1,8 @@
+namespace EmployeeManagementSystem.Domain.Enums;
+
+public enum EmployeeStatus
+{
+    Active = 1,
+    Inactive = 2,
+    Vacation = 3
+}
