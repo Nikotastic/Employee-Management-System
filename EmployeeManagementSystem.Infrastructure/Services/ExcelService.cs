@@ -2,6 +2,8 @@ using EmployeeManagementSystem.Application.DTOs;
 using EmployeeManagementSystem.Application.Interfaces;
 using EmployeeManagementSystem.Domain.Enums;
 using OfficeOpenXml;
+using System.Globalization;
+using System.Text;
 
 namespace EmployeeManagementSystem.Infrastructure.Services;
 
@@ -25,14 +27,15 @@ public class ExcelService : IExcelService
         
         var rowCount = worksheet.Dimension.Rows;
         
-        // Column Mapping in Spanish
+        // Column Mapping in Spanish (normalized keys)
         var columnMap = new Dictionary<string, int>();
         for (int col = 1; col <= worksheet.Dimension.Columns; col++)
         {
-            var headerValue = worksheet.Cells[1, col].Value?.ToString()?.Trim().ToLower();
-            if (!string.IsNullOrEmpty(headerValue))
+            var headerValue = worksheet.Cells[1, col].Value?.ToString();
+            var key = NormalizeKey(headerValue);
+            if (!string.IsNullOrEmpty(key))
             {
-                columnMap[headerValue] = col;
+                columnMap[key] = col;
             }
         }
         
@@ -74,11 +77,27 @@ public class ExcelService : IExcelService
         });
     }
     
+    private string NormalizeKey(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+        var lower = value.Trim().ToLowerInvariant();
+        var normalized = lower.Normalize(NormalizationForm.FormD);
+        var sb = new StringBuilder();
+        foreach (var c in normalized)
+        {
+            var uc = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (uc != UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        }
+        return sb.ToString();
+    }
+
     private string GetCellValue(ExcelWorksheet worksheet, int row, Dictionary<string, int> columnMap, params string[] possibleNames)
     {
         foreach (var name in possibleNames)
         {
-            if (columnMap.TryGetValue(name, out var col))
+            var key = NormalizeKey(name);
+            if (columnMap.TryGetValue(key, out var col))
             {
                 var value = worksheet.Cells[row, col].Value?.ToString()?.Trim();
                 if (!string.IsNullOrEmpty(value))
@@ -92,7 +111,8 @@ public class ExcelService : IExcelService
     {
         foreach (var name in possibleNames)
         {
-            if (columnMap.TryGetValue(name, out var col))
+            var key = NormalizeKey(name);
+            if (columnMap.TryGetValue(key, out var col))
             {
                 var cellValue = worksheet.Cells[row, col].Value;
                 
@@ -110,7 +130,8 @@ public class ExcelService : IExcelService
     {
         foreach (var name in possibleNames)
         {
-            if (columnMap.TryGetValue(name, out var col))
+            var key = NormalizeKey(name);
+            if (columnMap.TryGetValue(key, out var col))
             {
                 var cellValue = worksheet.Cells[row, col].Value;
                 
@@ -120,8 +141,12 @@ public class ExcelService : IExcelService
                 if (cellValue is decimal decimalValue)
                     return decimalValue;
                 
-                if (cellValue != null && decimal.TryParse(cellValue.ToString(), out var parsedDecimal))
+                if (cellValue != null && decimal.TryParse(cellValue.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedDecimal))
                     return parsedDecimal;
+
+                // try parse with current culture as fallback
+                if (cellValue != null && decimal.TryParse(cellValue.ToString(), out var parsedDecimal2))
+                    return parsedDecimal2;
             }
         }
         return 0;
@@ -129,32 +154,31 @@ public class ExcelService : IExcelService
     
     private int GetStatusValue(ExcelWorksheet worksheet, int row, Dictionary<string, int> columnMap, params string[] possibleNames)
     {
-        var statusText = GetCellValue(worksheet, row, columnMap, possibleNames).ToLower();
+        var statusText = NormalizeKey(GetCellValue(worksheet, row, columnMap, possibleNames));
         
         return statusText switch
         {
-            "Activo" => (int)EmployeeStatus.Active,
-            "Inactivo" => (int)EmployeeStatus.Inactive,
-            "Vacaciones" => (int)EmployeeStatus.Vacation,
+            "activo" => (int)EmployeeStatus.Active,
+            "inactivo" => (int)EmployeeStatus.Inactive,
+            "vacaciones" => (int)EmployeeStatus.Vacation,
             _ => (int)EmployeeStatus.Active
         };
     }
     
     private int GetEducationLevelValue(ExcelWorksheet worksheet, int row, Dictionary<string, int> columnMap, params string[] possibleNames)
     {
-        var educationText = GetCellValue(worksheet, row, columnMap, possibleNames).ToLower();
+        var educationText = NormalizeKey(GetCellValue(worksheet, row, columnMap, possibleNames));
         
         return educationText switch
         {
-            "Bachiller" or "Secundaria" => (int)EducationLevel.HighSchool,
-            "Tecnico" or "Técnico" => (int)EducationLevel.Technical,
-            "Tecnólogo" or "Tecnologo" => (int)EducationLevel.Technologist,
-            "Pregrado" or "Universitario" or "Profesional" => (int)EducationLevel.Professional,
-            "Especialización" or "Especializacion" or "Especialidad" => (int)EducationLevel.Specialization,
-            "Posgrado" or "Postgrado" or "Maestria" or "Maestría" or "Magister" => (int)EducationLevel.Master,
-            "Doctorado" or "phd" => (int)EducationLevel.Doctorate,
+            "bachiller" or "secundaria" => (int)EducationLevel.HighSchool,
+            "tecnico" or "técnico" => (int)EducationLevel.Technical,
+            "tecnologo" => (int)EducationLevel.Technologist,
+            "pregrado" or "universitario" or "profesional" => (int)EducationLevel.Professional,
+            "especializacion" or "especialidad" => (int)EducationLevel.Specialization,
+            "posgrado" or "postgrado" or "maestria" or "magister" => (int)EducationLevel.Master,
+            "doctorado" or "phd" => (int)EducationLevel.Doctorate,
             _ => (int)EducationLevel.HighSchool
         };
     }
 }
-

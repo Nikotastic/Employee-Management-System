@@ -169,20 +169,4 @@ You can filter unit vs integration tests using dotnet test filters if the soluti
 
     docker compose down
 
-## If login still fails
-
-1. Copy the exact error message from the API logs and I will inspect.
-2. Confirm whether the failing login is: MVC admin sign-in (Identity cookie) or API login (Returns JWT). They are different flows.
-3. If the issue is migrations (no admin user created), check data seeder logs; you can create the admin user manually with a minimal script or SQL insert.
-
-## Contact / Next steps I can help with
-
-- I can update `compose.yaml` ports if current mappings conflict on your machine.
-- I can provide the exact minimal CORS and JWT configuration lines to add to `Program.cs` to fix the Swagger vs front-end issue.
-- I can produce a short troubleshooting script to collect logs and token payload for debugging.
-
-If you want the README to include additional specifics (exact env file example, or the exact Program.cs snippets to add for CORS/JWT), tell me and I will add them.
-
----
-
-Thank you — if you confirm this README is good, I will save it. If you prefer extra troubleshooting lines or a sample `.env` section, I will add it next.
+### GITHUB: https://github.com/Nikotastic/Employee-Management-System.git

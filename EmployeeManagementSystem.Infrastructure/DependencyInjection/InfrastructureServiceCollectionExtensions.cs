@@ -35,17 +35,20 @@ public static class InfrastructureServiceCollectionExtensions
         .AddEntityFrameworkStores<ApplicationDbContext>()
         .AddDefaultTokenProviders();
 
-        // JWT Authentication
+        // JWT Authentication (para la API)
         var jwtKey = configuration["JWT:Key"];
         var jwtIssuer = configuration["JWT:Issuer"];
         var jwtAudience = configuration["JWT:Audience"];
 
+        // Autenticación: Soportar tanto Cookies (Web) como JWT (API)
         services.AddAuthentication(options =>
         {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            // Por defecto usar cookies para la Web
+            options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+            options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+            options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
         })
-        .AddJwtBearer(options =>
+        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
@@ -74,6 +77,20 @@ public static class InfrastructureServiceCollectionExtensions
         // HttpClient para servicios externos
         services.AddHttpClient();
 
+        return services;
+    }
+    
+    /// <summary>
+    /// Configura JWT como esquema de autenticación por defecto para la API
+    /// </summary>
+    public static IServiceCollection AddJwtAsDefault(this IServiceCollection services)
+    {
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        });
+        
         return services;
     }
 }

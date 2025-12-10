@@ -1,8 +1,11 @@
 using EmployeeManagementSystem.Application;
 using EmployeeManagementSystem.Infrastructure.DependencyInjection;
 using DotNetEnv;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
-// Cargar variables de entorno desde el archivo .env
+// Cargar archivo .env
 var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
 if (File.Exists(envPath))
 {
@@ -16,19 +19,29 @@ else
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Agregar variables de entorno a la configuración
+// Configuración del sistema
 builder.Configuration.AddEnvironmentVariables();
 
-// Add services to the container.
+// Agregar servicios
 builder.Services.AddControllersWithViews();
-
-// Add Application and Infrastructure layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// Configurar cookies para la aplicación web (NO JWT)
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/Login";
+    options.ExpireTimeSpan = TimeSpan.FromHours(24);
+    options.SlidingExpiration = true;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+});
+
 var app = builder.Build();
 
-// Aplicar migraciones y seed data
+// 4️⃣ Migraciones + Seed
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -46,11 +59,10 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+// 5️⃣ Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -58,6 +70,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
 
 app.UseAuthentication();
 app.UseAuthorization();

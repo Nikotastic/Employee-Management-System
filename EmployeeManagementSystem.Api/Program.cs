@@ -63,6 +63,9 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// Configurar JWT como esquema por defecto para la API
+builder.Services.AddJwtAsDefault();
+
 // CORS
 builder.Services.AddCors(options =>
 {
