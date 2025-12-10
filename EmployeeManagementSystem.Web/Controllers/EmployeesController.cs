@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using EmployeeManagementSystem.Application.DTOs;
 using EmployeeManagementSystem.Application.Interfaces;
 using EmployeeManagementSystem.Domain.Interfaces;
+using System.Linq;
 
 namespace EmployeeManagementSystem.Web.Controllers;
 
@@ -33,18 +34,25 @@ public class EmployeesController : Controller
         _logger = logger;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
     {
         try
         {
-            var employees = await _employeeService.GetAllEmployeesAsync();
-            return View(employees);
+            // Ensure page is at least 1
+            if (page < 1) page = 1;
+            
+            // Limit page size between 5 and 100
+            if (pageSize < 5) pageSize = 5;
+            if (pageSize > 100) pageSize = 100;
+            
+            var paginatedEmployees = await _employeeService.GetEmployeesPagedAsync(page, pageSize);
+            return View(paginatedEmployees);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error al cargar empleados");
             TempData["Error"] = "Error al cargar los empleados";
-            return View(new List<EmployeeDto>());
+            return View(new PaginatedResult<EmployeeDto> { Items = new List<EmployeeDto>(), CurrentPage = 1, PageSize = pageSize, TotalItems = 0 });
         }
     }
 
@@ -259,8 +267,14 @@ public class EmployeesController : Controller
 
         ViewBag.Departments = new SelectList(departments, "Id", "Name");
         ViewBag.JobPositions = new SelectList(jobPositions, "Id", "Name");
-        ViewBag.EmployeeStatuses = new SelectList(Enum.GetValues(typeof(Domain.Enums.EmployeeStatus)));
-        ViewBag.EducationLevels = new SelectList(Enum.GetValues(typeof(Domain.Enums.EducationLevel)));
+        // Ensure values are Cast to int so validation passes
+        ViewBag.EmployeeStatuses = new SelectList(Enum.GetValues(typeof(Domain.Enums.EmployeeStatus))
+            .Cast<Domain.Enums.EmployeeStatus>()
+            .Select(e => new { Id = (int)e, Name = e.ToString() }), "Id", "Name");
+            
+        ViewBag.EducationLevels = new SelectList(Enum.GetValues(typeof(Domain.Enums.EducationLevel))
+            .Cast<Domain.Enums.EducationLevel>()
+            .Select(e => new { Id = (int)e, Name = e.ToString() }), "Id", "Name");
     }
 }
 

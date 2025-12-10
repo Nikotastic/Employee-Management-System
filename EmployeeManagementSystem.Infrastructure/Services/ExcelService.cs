@@ -55,7 +55,7 @@ public class ExcelService : IExcelService
                     Phone = GetCellValue(worksheet, row, columnMap, "telefono", "teléfono", "celular", "Telefono"),
                     Salary = GetDecimalValue(worksheet, row, columnMap, "salario", "sueldo", "Salario" ),
                     HiringDate = GetDateValue(worksheet, row, columnMap, "fecha de contratacion", "fecha contratación", "fecha ingreso", "fecha de ingreso", "FechaIngreso"),
-                    ProfessionalProfile = GetCellValue(worksheet, row, columnMap, "perfil profesional", "perfil", "descripcion", "Perfil Profesional"),
+                    ProfessionalProfile = GetCellValue(worksheet, row, columnMap, "perfil profesional", "perfil", "descripcion", "Perfil Profesional", "PerfilProfesional", "perfilprofesional"),
                     Status = GetStatusValue(worksheet, row, columnMap, "estado", "Estado"),
                     EducationLevel = GetEducationLevelValue(worksheet, row, columnMap, "nivel educativo", "educacion", "educación", "Nivel Educativo", "NivelEducativo", "niveleducativo"),
                     JobPositionId = 0, 
@@ -63,12 +63,37 @@ public class ExcelService : IExcelService
                     JobPositionName = GetCellValue(worksheet, row, columnMap, "cargo", "posicion", "puesto", "Cargo"),
                     DepartmentName = GetCellValue(worksheet, row, columnMap, "departamento", "area", "área", "Departamento")
                 };
+
+                // Debug: Log the professional profile value
+                Console.WriteLine($"Row {row} - Document: {employee.Document}, ProfessionalProfile: '{employee.ProfessionalProfile}'");
+
+                // Fallback for missing Document (Generate from Email or Random)
+                if (string.IsNullOrEmpty(employee.Document))
+                {
+                    if (!string.IsNullOrEmpty(employee.Email))
+                    {
+                         // Generate a numeric string from email hash to simulate a document ID
+                         employee.Document = Math.Abs(employee.Email.GetHashCode()).ToString();
+                    }
+                    else
+                    {
+                         // Random 8 digit number
+                         employee.Document = new Random().Next(10000000, 99999999).ToString();
+                    }
+                }
+
+                // Fallback for missing Department
+                if (string.IsNullOrEmpty(employee.DepartmentName))
+                {
+                    employee.DepartmentName = "General";
+                }
                 
                 employees.Add(employee);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Log error or handle accordingly
+                 Console.WriteLine($"Error importing row {row}: {ex.Message} - {ex.StackTrace}");
                 continue;
             }
         }
@@ -119,6 +144,16 @@ public class ExcelService : IExcelService
                 if (cellValue is DateTime dateTime)
                     return dateTime;
                 
+                // Handle Excel numeric dates (double)
+                if (cellValue is double doubleDate)
+                {
+                    try 
+                    {
+                        return DateTime.FromOADate(doubleDate);
+                    }
+                    catch {}
+                }
+
                 if (cellValue != null && DateTime.TryParse(cellValue.ToString(), out var parsedDate))
                     return parsedDate;
             }

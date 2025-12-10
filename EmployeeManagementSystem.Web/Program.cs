@@ -5,17 +5,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-// Cargar archivo .env
-var envPath = Path.Combine(Directory.GetCurrentDirectory(), "..", ".env");
-if (File.Exists(envPath))
-{
-    Env.Load(envPath);
-    Console.WriteLine($"✅ Variables de entorno cargadas desde: {envPath}");
-}
-else
-{
-    Console.WriteLine($"⚠️ Archivo .env no encontrado en: {envPath}");
-}
+// Enable legacy timestamp behavior to allow Unspecified dates in PostgreSQL
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+// Environment variables are injected by Docker Compose, no need to load manually here in production/docker.
+// Checks for development if needed, but removing to clean logs.
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -10,7 +10,8 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
     {
             builder.ToTable("employees");
 
-            builder.HasKey(e => e.Document);
+            builder.HasKey(e => e.Id);
+            builder.Property(e => e.Id).HasColumnName("id");
             
             builder.Property(e => e.Document)
                 .HasColumnName("document")

@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,36 +12,6 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Crear tabla Departments
-            migrationBuilder.CreateTable(
-                name: "departments",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_departments", x => x.id);
-                });
-
-            // Crear tabla JobPositions
-            migrationBuilder.CreateTable(
-                name: "job_positions",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_job_positions", x => x.id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -81,6 +51,34 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "departments",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_departments", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "job_positions",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_job_positions", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -189,57 +187,42 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            // Crear tabla Employees
             migrationBuilder.CreateTable(
                 name: "employees",
                 columns: table => new
                 {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     document = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    address = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    city = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    phone_number = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
-                    email_address = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: true),
-                    hire_date = table.Column<DateTime>(type: "date", nullable: false),
-                    job_title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    salary = table.Column<decimal>(type: "numeric(18,2)", nullable: true),
-                    department_name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    education_level = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    institution = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    graduation_year = table.Column<int>(type: "integer", nullable: true),
-                    status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false, defaultValue: "Active"),
-                    department_id = table.Column<int>(type: "integer", nullable: true),
-                    job_position_id = table.Column<int>(type: "integer", nullable: true),
+                    hire_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    address = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    email_address = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    phone_number = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    job_position_id = table.Column<int>(type: "integer", nullable: false),
+                    salary = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false),
+                    education_level = table.Column<string>(type: "text", nullable: false),
+                    job_title = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    department_id = table.Column<int>(type: "integer", nullable: false),
+                    city = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    department_name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    graduation_year = table.Column<int>(type: "integer", nullable: true),
+                    institution = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_employees", x => x.document);
+                    table.PrimaryKey("PK_employees", x => x.id);
                     table.ForeignKey(
                         name: "FK_employees_departments_department_id",
                         column: x => x.department_id,
                         principalTable: "departments",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_employees_job_positions_job_position_id",
-                        column: x => x.job_position_id,
-                        principalTable: "job_positions",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_employees_department_id",
-                table: "employees",
-                column: "department_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_employees_job_position_id",
-                table: "employees",
-                column: "job_position_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -277,6 +260,17 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_employees_department_id",
+                table: "employees",
+                column: "department_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_employees_document",
+                table: "employees",
+                column: "document",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -301,6 +295,9 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
                 name: "employees");
 
             migrationBuilder.DropTable(
+                name: "job_positions");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
@@ -308,9 +305,6 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "departments");
-
-            migrationBuilder.DropTable(
-                name: "job_positions");
         }
     }
 }

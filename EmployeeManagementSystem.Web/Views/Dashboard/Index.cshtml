@@ -89,33 +89,40 @@
     <!-- AI Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-brain"></i> Smart Assistant
+            <div class="card shadow" style="height: 500px;">
+                <div class="card-header py-3 bg-gradient-primary text-white d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-robot mr-2"></i> TalentoPlus AI Assistant
                     </h6>
+                    <span class="badge bg-light text-primary">Beta</span>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted">Ask questions about system data in natural language</p>
-                    
-                    <div class="input-group mb-3">
-                        <input type="text" id="aiQuery" class="form-control" 
-                               placeholder="Ej: How many employees are there in the Technology department?">
-                        <button class="btn btn-primary" type="button" id="askAIBtn">
-                            <i class="fas fa-paper-plane"></i> CConsult
-                        </button>
-                    </div>
-
-                    <div id="aiResponse" class="alert alert-light" style="display:none;">
-                        <strong>Answer:</strong>
-                        <div id="aiResponseText"></div>
-                    </div>
-
-                    <div id="aiLoading" class="text-center" style="display:none;">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Charging...</span>
+                <div class="card-body d-flex flex-column p-0">
+                    <!-- Chat History -->
+                    <div id="chatHistory" class="flex-grow-1 p-3" style="overflow-y: auto; background-color: #f8f9fa;">
+                        <!-- Welcome Message -->
+                        <div class="d-flex flex-row align-items-start mb-3">
+                            <div class="p-2 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="ml-2 p-3 bg-white rounded shadow-sm text-dark" style="max-width: 75%; border-top-left-radius: 0;">
+                                <p class="mb-0">Hello! I am your AI assistant. How can I help you with employee data today?</p>
+                            </div>
                         </div>
-                        <p class="mt-2">Consulting with AI...</p>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="p-3 bg-white border-top">
+                        <div id="aiLoading" class="text-center mb-2" style="display:none;">
+                            <small class="text-muted"><i class="fas fa-circle-notch fa-spin"></i> Typing...</small>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="aiQuery" class="form-control border-0 bg-light" 
+                                   placeholder="Type your question here (e.g. 'How many active employees?')..." 
+                                   style="border-radius: 20px 0 0 20px; padding-left: 20px;">
+                            <button class="btn btn-primary px-4" type="button" id="askAIBtn" style="border-radius: 0 20px 20px 0;">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -176,17 +183,60 @@
 
 @section Scripts {
 <script>
-    document.getElementById('askAIBtn').addEventListener('click', async function() {
-        const query = document.getElementById('aiQuery').value;
+    const chatHistory = document.getElementById('chatHistory');
+    const aiQueryInput = document.getElementById('aiQuery');
+    const askAIBtn = document.getElementById('askAIBtn');
+    const aiLoading = document.getElementById('aiLoading');
+
+    function appendMessage(isUser, text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `d-flex flex-row align-items-start mb-3 ${isUser ? 'justify-content-end' : ''}`;
+
+        let avatar = '';
+        let bubbleClass = '';
         
-        if (!query.trim()) {
-            alert('Please write a query');
-            return;
+        if (isUser) {
+            // User: Avatar Right, Bubble Blue
+            avatar = `
+                <div class="ml-2 p-2 bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="fas fa-user"></i>
+                </div>`;
+            bubbleClass = 'bg-primary text-white';
+        } else {
+            // AI: Avatar Left, Bubble White
+            avatar = `
+                <div class="mr-2 p-2 bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; margin-right: 0.5rem;">
+                    <i class="fas fa-robot"></i>
+                </div>`;
+            bubbleClass = 'bg-white text-dark shadow-sm border';
         }
 
-        // Show loading
-        document.getElementById('aiLoading').style.display = 'block';
-        document.getElementById('aiResponse').style.display = 'none';
+        const bubbleStyle = isUser ? 'border-top-right-radius: 0;' : 'border-top-left-radius: 0;';
+        
+        const bubble = `
+            <div class="p-3 rounded ${bubbleClass}" style="max-width: 75%; ${bubbleStyle}">
+                <p class="mb-0 text-break" style="white-space: pre-wrap;">${text}</p>
+            </div>
+        `;
+
+        messageDiv.innerHTML = isUser ? bubble + avatar : avatar + bubble;
+        chatHistory.appendChild(messageDiv);
+        chatHistory.scrollTop = chatHistory.scrollHeight; // Auto scroll
+    }
+
+    askAIBtn.addEventListener('click', async function() {
+        const query = aiQueryInput.value.trim();
+        
+        if (!query) return;
+
+        // 1. Show User Message
+        appendMessage(true, query);
+        aiQueryInput.value = '';
+        askAIBtn.disabled = true;
+
+        // 2. Show Loading
+        aiLoading.style.display = 'block';
+        chatHistory.scrollTop = chatHistory.scrollHeight;
 
         try {
             const response = await fetch('/Dashboard/AskAI', {
@@ -200,25 +250,27 @@
 
             const data = await response.json();
 
-            // Hide loading
-            document.getElementById('aiLoading').style.display = 'none';
+            // 3. Hide Loading
+            aiLoading.style.display = 'none';
+            askAIBtn.disabled = false;
 
             if (response.ok) {
-                document.getElementById('aiResponseText').innerText = data.response;
-                document.getElementById('aiResponse').style.display = 'block';
+                // 4. Show AI Response
+                appendMessage(false, data.response);
             } else {
-                alert('Error: ' + (data.error || 'Unknown error'));
+                appendMessage(false, '❌ Error: ' + (data.error || 'Unknown error'));
             }
         } catch (error) {
-            document.getElementById('aiLoading').style.display = 'none';
-            alert('Error connecting to the server: ' + error.message);
+            aiLoading.style.display = 'none';
+            askAIBtn.disabled = false;
+            appendMessage(false, '⚠️ Connection Error: ' + error.message);
         }
     });
 
-    // Allow sending with Enter
-    document.getElementById('aiQuery').addEventListener('keypress', function(e) {
+    // Send with Enter
+    aiQueryInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-            document.getElementById('askAIBtn').click();
+            askAIBtn.click();
         }
     });
 </script>

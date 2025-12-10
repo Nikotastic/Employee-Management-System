@@ -26,14 +26,20 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
@@ -44,33 +50,59 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("character varying(250)")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("address");
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("birth_date");
+                        .HasColumnName("hire_date");
 
                     b.Property<int>("DepartmentId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("department_id");
 
                     b.Property<string>("Document")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("document");
 
                     b.Property<string>("ProfessionalProfile")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("professional_profile");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("job_title");
+
+                    b.Property<string>("city")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("city");
+
+                    b.Property<string>("department_name")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("department_name");
+
+                    b.Property<int?>("graduation_year")
+                        .HasColumnType("integer")
+                        .HasColumnName("graduation_year");
+
+                    b.Property<string>("institution")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("institution");
+
+                    b.Property<DateTime?>("updated_at")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
 
                     b.HasKey("Id");
 
@@ -86,14 +118,20 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
 
                     b.HasKey("Id");
 
@@ -310,13 +348,39 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.OwnsOne("EmployeeManagementSystem.Domain.ValueObjects.ContactInfo", "ContactInfo", b1 =>
+                        {
+                            b1.Property<int>("EmployeeId")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("Email")
+                                .IsRequired()
+                                .HasMaxLength(150)
+                                .HasColumnType("character varying(150)")
+                                .HasColumnName("email_address");
+
+                            b1.Property<string>("Phone")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("phone_number");
+
+                            b1.HasKey("EmployeeId");
+
+                            b1.ToTable("employees");
+
+                            b1.WithOwner()
+                                .HasForeignKey("EmployeeId");
+                        });
+
                     b.OwnsOne("EmployeeManagementSystem.Domain.ValueObjects.EducationInfo", "EducationInfo", b1 =>
                         {
                             b1.Property<int>("EmployeeId")
                                 .HasColumnType("integer");
 
-                            b1.Property<int>("Level")
-                                .HasColumnType("integer")
+                            b1.Property<string>("Level")
+                                .IsRequired()
+                                .HasColumnType("text")
                                 .HasColumnName("education_level");
 
                             b1.HasKey("EmployeeId");
@@ -359,18 +423,19 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
 
                             b1.Property<DateTime>("HiringDate")
                                 .HasColumnType("timestamp with time zone")
-                                .HasColumnName("hire_date");
+                                .HasColumnName("created_at");
 
                             b1.Property<int>("JobPositionId")
                                 .HasColumnType("integer")
-                                .HasColumnName("position_id");
+                                .HasColumnName("job_position_id");
 
                             b1.Property<decimal>("Salary")
-                                .HasColumnType("numeric")
+                                .HasColumnType("numeric(18,2)")
                                 .HasColumnName("salary");
 
-                            b1.Property<int>("Status")
-                                .HasColumnType("integer")
+                            b1.Property<string>("Status")
+                                .IsRequired()
+                                .HasColumnType("text")
                                 .HasColumnName("status");
 
                             b1.HasKey("EmployeeId");
@@ -380,6 +445,9 @@ namespace EmployeeManagementSystem.Infrastructure.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("EmployeeId");
                         });
+
+                    b.Navigation("ContactInfo")
+                        .IsRequired();
 
                     b.Navigation("Department");
 

@@ -37,6 +37,21 @@ public class EmployeeRepository : IEmployeeRepository
             .ToListAsync();
     }
 
+    public async Task<(IEnumerable<Employee> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize)
+    {
+        var query = _dbContext.Employees.Include(e => e.Department);
+        
+        var totalCount = await query.CountAsync();
+        
+        var items = await query
+            .OrderBy(e => e.Id)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        
+        return (items, totalCount);
+    }
+
     public async Task<Employee?> GetByDocumentIdAsync(string documentId)
     {
         return await _dbContext.Employees
@@ -53,6 +68,15 @@ public class EmployeeRepository : IEmployeeRepository
 
     public async Task UpdateAsync(Employee employee)
     {
+        // Detach any existing tracked entity with the same ID to prevent tracking conflicts
+        var existingEntry = _dbContext.ChangeTracker.Entries<Employee>()
+            .FirstOrDefault(e => e.Entity.Id == employee.Id);
+        
+        if (existingEntry != null)
+        {
+            existingEntry.State = EntityState.Detached;
+        }
+
         _dbContext.Employees.Update(employee);
         await _dbContext.SaveChangesAsync();
     }

@@ -48,6 +48,29 @@ public class EmployeeService : IEmployeeService
         return employeeDtos;
     }
 
+    // Get paginated employees with job position names
+    public async Task<PaginatedResult<EmployeeDto>> GetEmployeesPagedAsync(int pageNumber, int pageSize)
+    {
+        var (employees, totalCount) = await _employeeRepository.GetPagedAsync(pageNumber, pageSize);
+        var employeeDtos = new List<EmployeeDto>();
+        
+        foreach (var employee in employees)
+        {
+            var dto = MapToDto(employee);
+            var jobPosition = await _jobPositionRepository.GetByIdAsync(employee.JobInfo.JobPositionId);
+            dto.JobPositionName = jobPosition?.Name ?? "";
+            employeeDtos.Add(dto);
+        }
+        
+        return new PaginatedResult<EmployeeDto>
+        {
+            Items = employeeDtos,
+            CurrentPage = pageNumber,
+            PageSize = pageSize,
+            TotalItems = totalCount
+        };
+    }
+
     // Get employee by ID with job position name
     public async Task<EmployeeDto?> GetEmployeeByIdAsync(int id)
     {
@@ -124,6 +147,14 @@ public class EmployeeService : IEmployeeService
             departmentId: dto.DepartmentId
         );
 
+        // CRITICAL: Set the ID of the existing employee to ensure EF Core updates the correct record
+        // Using reflection to set the private Id property
+        var idProperty = typeof(Employee).GetProperty("Id");
+        if (idProperty != null)
+        {
+            idProperty.SetValue(updatedEmployee, id);
+        }
+
         await _employeeRepository.UpdateAsync(updatedEmployee);
     }
 
@@ -144,15 +175,7 @@ public class EmployeeService : IEmployeeService
             {
                 try
                 {
-                    // Verify if the employee already exists
-                    var existing = await _employeeRepository.GetByDocumentIdAsync(dto.Document);
-                    if (existing != null)
-                    {
-                        _logger.LogWarning("Employee with document {Document} already exists, ignored", dto.Document);
-                        continue;
-                    }
-
-                    // Search or create Job Position
+                    // 1. Search or create Job Position and Department FIRST (needed for both create and update)
                     if (!string.IsNullOrEmpty(dto.JobPositionName))
                     {
                         var jobPosition = await _jobPositionRepository.GetByNameAsync(dto.JobPositionName);
@@ -165,7 +188,6 @@ public class EmployeeService : IEmployeeService
                         dto.JobPositionId = jobPosition.Id;
                     }
 
-                    // Search or create Department
                     if (!string.IsNullOrEmpty(dto.DepartmentName))
                     {
                         var department = await _departmentRepository.GetByNameAsync(dto.DepartmentName);
@@ -178,15 +200,37 @@ public class EmployeeService : IEmployeeService
                         dto.DepartmentId = department.Id;
                     }
 
-                    // Create employee if it has valid data
-                    if (dto.JobPositionId > 0 && dto.DepartmentId > 0)
+                    // 2. Validate IDs
+                    if (dto.JobPositionId <= 0 || dto.DepartmentId <= 0)
                     {
-                        await CreateEmployeeAsync(dto);
+                         _logger.LogWarning("Employee {Document} skipped: Invalid Job or Department", dto.Document);
+                         continue;
+                    }
+
+                    // 3. Check if employee exists
+                    var existing = await _employeeRepository.GetByDocumentIdAsync(dto.Document);
+                    
+                    if (existing != null)
+                    {
+                        // UPDATE EXISTING
+                        // We map the incoming DTO to the Update Logic
+                        // Since UpdateEmployeeAsync takes CreateEmployeeDto, we can reuse it or manually update properties
+                        
+                        // Manually updating the entity to ensure persistence
+                        // Note: Depending on your repository pattern, you might need to Attach/Entry modify. 
+                        // Assuming UpdateAsync handles a detached or attached entity correctly.
+                        
+                        // We need to use the ID of the EXISTING employee to update it
+                        await UpdateEmployeeAsync(existing.Id, dto);
+                        _logger.LogInformation("Employee updated: {Document}", dto.Document);
+                        // We count updates as imports/process items
                         importedCount++;
                     }
                     else
                     {
-                        _logger.LogWarning("Employee {Document} does not have a valid position or department", dto.Document);
+                        // CREATE NEW
+                        await CreateEmployeeAsync(dto);
+                        importedCount++;
                     }
                 }
                 catch (Exception ex)

@@ -6,6 +6,7 @@ namespace EmployeeManagementSystem.Application.Interfaces;
 public interface IEmployeeService
 {
     Task<IEnumerable<EmployeeDto>> GetAllEmployeesAsync();
+    Task<PaginatedResult<EmployeeDto>> GetEmployeesPagedAsync(int pageNumber, int pageSize);
     Task<EmployeeDto?> GetEmployeeByIdAsync(int id);
     Task<EmployeeDto?> GetEmployeeByDocumentAsync(string document);
     Task<EmployeeDto> CreateEmployeeAsync(CreateEmployeeDto dto);
