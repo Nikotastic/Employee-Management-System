@@ -20,4 +20,5 @@ RUN dotnet publish "./EmployeeManagementSystem.Api.csproj" -c $BUILD_CONFIGURATI
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV ASPNETCORE_URLS=http://+:8080
 ENTRYPOINT ["dotnet", "EmployeeManagementSystem.Api.dll"]

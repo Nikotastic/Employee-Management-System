@@ -1,0 +1,145 @@
+@{
+    ViewData["Title"] = "Import Employees from Excel";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3">
+                <i class="fas fa-file-excel"></i> Import Employees from Excel
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Employees</a></li>
+                    <li class="breadcrumb-item active">Import Excel</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-upload"></i>Upload Excel File
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="ImportExcel" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        
+                        <div class="mb-4">
+                            <label for="file" class="form-label">Select the Excel file (.xlsx or .xls)</label>
+                            <input type="file" name="file" id="file" class="form-control" accept=".xlsx,.xls" required />
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i> The file must be Excel format (.xlsx or .xls) with the correct columns
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-upload"></i> Import Employees
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Important Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Columns required in Excel:</h6> 
+                    <ul class="small"> 
+                        <li>Document</li> 
+                        <li>Names</li> 
+                        <li>Surnames</li> 
+                        <li>Date of Birth</li> 
+                        <li>Address</li> 
+                        <li>Email</li> 
+                        <li>Phone</li> 
+                        <li>Position</li> 
+                        <li>Department</li> 
+                        <li>Salary</li> 
+                        <li>Entry Date</li> 
+                        <li>Status</li> 
+                        <li>Educational Level</li> 
+                        <li>Professional Profile</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Notes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-0">
+                        <li>Departments and positions will be created automatically if they do not exist</li> 
+                        <li>Duplicate employees (same document) will be ignored</li> 
+                        <li>Columns can be in Spanish</li> 
+                        <li>The first row must contain the headers</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> Valid States
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="small mb-0">
+                        <li><span class="badge bg-success">Active</span></li> 
+                        <li><span class="badge bg-info">Vacation</span></li> 
+                        <li><span class="badge bg-secondary">Inactive</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-graduation-cap"></i>Valid Educational Levels
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul>
+                                <li>Bachelor/Secondary</li> 
+                                <li>Technical</li> 
+                                <li>Technologist</li> 
+                                <li>Professional / Undergraduate / University </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul> 
+                                <li>Specialization</li> 
+                                <li>Master / Postgraduate / Master</li> 
+                                <li>Doctorate / PhD</li> 
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

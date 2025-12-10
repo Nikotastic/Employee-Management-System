@@ -1,5 +1,5 @@
 namespace EmployeeManagementSystem.Domain.Enums;
-
+// Enumeration for different employee statuses
 public enum EmployeeStatus
 {
     Active = 1,

@@ -11,6 +11,8 @@ test-auth.ps1
 # Local configuration files (may contain passwords/secrets)
 appsettings.Local.json
 **/appsettings.Local.json
+appsettings.Development.json
+**/appsettings.Development.json
 
 # User-specific files
 *.rsuser

@@ -2,6 +2,7 @@ using EmployeeManagementSystem.Domain.Entities;
 
 namespace EmployeeManagementSystem.Domain.Interfaces;
 
+// Repository interface for Department entity
 public interface IDepartmentRepository
 {
     Task<IEnumerable<Department>> GetAllAsync();

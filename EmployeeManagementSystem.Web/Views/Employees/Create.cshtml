@@ -1,0 +1,162 @@
+@model CreateEmployeeDto
+@{
+    ViewData["Title"] = "Create Employee";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3">
+                <i class="fas fa-user-plus"></i>Create New Employee
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Employees</a></li>
+                    <li class="breadcrumb-item active">Create</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-id-card"></i> Personal Information
+                </h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Document" class="form-label">Document *</label>
+                        <input asp-for="Document" class="form-control" placeholder="Ej: 123456789" />
+                        <span asp-validation-for="Document" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="BirthDate" class="form-label">Birthdate *</label>
+                        <input asp-for="BirthDate" type="date" class="form-control" />
+                        <span asp-validation-for="BirthDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FirstName" class="form-label">Names *</label>
+                        <input asp-for="FirstName" class="form-control" placeholder="Ej: Juan Carlos" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="LastName" class="form-label">LastName *</label>
+                        <input asp-for="LastName" class="form-control" placeholder="Ej: Pérez González" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label">Address *</label>
+                    <input asp-for="Address" class="form-control" placeholder="Ej: Calle 123 #45-67" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+
+                <hr class="my-4">
+
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-envelope"></i> Contact Information
+                </h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Email" class="form-label">Email*</label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="Ej: empleado@correo.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Phone" class="form-label">Phone *</label>
+                        <input asp-for="Phone" class="form-control" placeholder="Ej: 3001234567" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-briefcase"></i> Labor Information
+                </h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DepartmentId" class="form-label">Department *</label>
+                        <select asp-for="DepartmentId" class="form-select" asp-items="ViewBag.Departments">
+                            <option value="">-- Select --</option>
+                        </select>
+                        <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="JobPositionId" class="form-label">Position title *</label>
+                        <select asp-for="JobPositionId" class="form-select" asp-items="ViewBag.JobPositions">
+                            <option value="">-- Select--</option>
+                        </select>
+                        <span asp-validation-for="JobPositionId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Salary" class="form-label">Salary*</label>
+                        <input asp-for="Salary" type="number" step="0.01" class="form-control" placeholder="Ej: 3000000" />
+                        <span asp-validation-for="Salary" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="HiringDate" class="form-label">Hire Date *</label>
+                        <input asp-for="HiringDate" type="date" class="form-control" />
+                        <span asp-validation-for="HiringDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Status" class="form-label">Status *</label>
+                    <select asp-for="Status" class="form-select" asp-items="ViewBag.EmployeeStatuses">
+                        <option value="">-- Select--</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+                <hr class="my-4">
+
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-graduation-cap"></i> Academic Information
+                </h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EducationLevel" class="form-label">Educational Level *</label>
+                        <select asp-for="EducationLevel" class="form-select" asp-items="ViewBag.EducationLevels">
+                            <option value="">-- Select --</option>
+                        </select>
+                        <span asp-validation-for="EducationLevel" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProfessionalProfile" class="form-label">Professional Profile</label>
+                    <textarea asp-for="ProfessionalProfile" class="form-control" rows="4" 
+                              placeholder="Describe the employee's experience and skills..."></textarea>
+                    <span asp-validation-for="ProfessionalProfile" class="text-danger"></span>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Employee
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

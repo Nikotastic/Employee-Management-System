@@ -2,6 +2,7 @@ using EmployeeManagementSystem.Domain.Entities;
 
 namespace EmployeeManagementSystem.Domain.Interfaces;
 
+// Repository interface for Employee entity
 public interface IEmployeeRepository
 {
     Task<IEnumerable<Employee>> GetAllAsync();

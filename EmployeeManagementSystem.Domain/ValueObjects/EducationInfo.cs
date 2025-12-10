@@ -4,7 +4,12 @@ namespace EmployeeManagementSystem.Domain.ValueObjects;
 
 public class EducationInfo
 {
-    public EducationLevel Level { get; }
+    public EducationLevel Level { get; private set; }
+
+    private EducationInfo()
+    {
+        Level = EducationLevel.HighSchool;
+    }
 
     public EducationInfo(EducationLevel level)
     {

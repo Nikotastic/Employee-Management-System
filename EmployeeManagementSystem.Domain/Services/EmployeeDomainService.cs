@@ -2,6 +2,7 @@ using EmployeeManagementSystem.Domain.Entities;
 
 namespace EmployeeManagementSystem.Domain.Services;
 
+// Domain service for Employee entity
 public class EmployeeDomainService
 {
     public void ValidateNewEmployee(Employee employee)

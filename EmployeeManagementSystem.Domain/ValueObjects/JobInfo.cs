@@ -4,10 +4,18 @@ namespace EmployeeManagementSystem.Domain.ValueObjects;
 
 public class JobInfo
 {
-    public int JobPositionId { get; }
-    public decimal Salary { get; }
-    public DateTime HiringDate { get; }
-    public EmployeeStatus Status { get; }
+    public int JobPositionId { get; private set; }
+    public decimal Salary { get; private set; }
+    public DateTime HiringDate { get; private set; }
+    public EmployeeStatus Status { get; private set; }
+
+    private JobInfo()
+    {
+        JobPositionId = 0;
+        Salary = 0;
+        HiringDate = DateTime.MinValue;
+        Status = EmployeeStatus.Active;
+    }
 
     public JobInfo(int jobPositionId, decimal salary, DateTime hiringDate, EmployeeStatus status)
     {

@@ -1,0 +1,241 @@
+@model EmployeeManagementSystem.Web.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-0">Dashboard - TalentoPlus S.A.S</h1>
+            <p class="text-muted">General summary of the employee management system</p>
+        </div>
+    </div>
+
+    <!-- Metric cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Employees
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalEmployees</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Active Employees
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.ActiveEmployees</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                On Vacation
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.OnVacationEmployees</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-umbrella-beach fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Inactive
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.InactiveEmployees</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-times fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-brain"></i> Smart Assistant
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Ask questions about system data in natural language</p>
+                    
+                    <div class="input-group mb-3">
+                        <input type="text" id="aiQuery" class="form-control" 
+                               placeholder="Ej: How many employees are there in the Technology department?">
+                        <button class="btn btn-primary" type="button" id="askAIBtn">
+                            <i class="fas fa-paper-plane"></i> CConsult
+                        </button>
+                    </div>
+
+                    <div id="aiResponse" class="alert alert-light" style="display:none;">
+                        <strong>Answer:</strong>
+                        <div id="aiResponseText"></div>
+                    </div>
+
+                    <div id="aiLoading" class="text-center" style="display:none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Charging...</span>
+                        </div>
+                        <p class="mt-2">Consulting with AI...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent employees -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Recently Registered Employees</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentEmployees.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Document</th> 
+                                        <th>Name</th> 
+                                        <th>Position</th> 
+                                        <th>Department</th> 
+                                        <th>Entry Date</th> 
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var emp in Model.RecentEmployees)
+                                    {
+                                        <tr>
+                                            <td>@emp.Document</td>
+                                            <td>@emp.FirstName @emp.LastName</td>
+                                            <td>@emp.JobPositionName</td>
+                                            <td>@emp.DepartmentName</td>
+                                            <td>@emp.HiringDate.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <span class="badge @(emp.Status == "Active" ? "bg-success" : emp.Status == "Vacation" ? "bg-info" : "bg-secondary")">
+                                                    @emp.Status
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">There are no registered employees</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.getElementById('askAIBtn').addEventListener('click', async function() {
+        const query = document.getElementById('aiQuery').value;
+        
+        if (!query.trim()) {
+            alert('Please write a query');
+            return;
+        }
+
+        // Show loading
+        document.getElementById('aiLoading').style.display = 'block';
+        document.getElementById('aiResponse').style.display = 'none';
+
+        try {
+            const response = await fetch('/Dashboard/AskAI', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ query: query })
+            });
+
+            const data = await response.json();
+
+            // Hide loading
+            document.getElementById('aiLoading').style.display = 'none';
+
+            if (response.ok) {
+                document.getElementById('aiResponseText').innerText = data.response;
+                document.getElementById('aiResponse').style.display = 'block';
+            } else {
+                alert('Error: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            document.getElementById('aiLoading').style.display = 'none';
+            alert('Error connecting to the server: ' + error.message);
+        }
+    });
+
+    // Allow sending with Enter
+    document.getElementById('aiQuery').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('askAIBtn').click();
+        }
+    });
+</script>
+}
+
+<style>
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+</style>
+
