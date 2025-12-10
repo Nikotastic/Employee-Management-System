@@ -1,466 +1,188 @@
-# 🚀 Sistema de Gestión de Empleados - TalentoPlus S.A.S
+# EmployeeManagementSystem
 
-Sistema completo de gestión de recursos humanos desarrollado con **ASP.NET Core 8.0**, **PostgreSQL**, **Clean Architecture** y servicios de IA integrados.
+A complete Employee Management System for TalentoPlus S.A.S — ASP.NET Core 8 application with a Web Admin (MVC), REST API, PostgreSQL database, Excel import, PDF generation and a simple AI-assisted dashboard.
 
-## 📋 Tabla de Contenidos
+This README documents how to run the solution (Docker Compose), useful URLs, common troubleshooting (including JWT issues when Swagger works but the front-end shows "Unauthorized"), environment variables, default credentials and testing commands.
 
-- [Características](#características)
-- [Arquitectura](#arquitectura)
-- [Requisitos Previos](#requisitos-previos)
-- [Instalación y Configuración](#instalación-y-configuración)
-- [Ejecución con Docker](#ejecución-con-docker)
-- [Endpoints de la API](#endpoints-de-la-api)
-- [Credenciales de Acceso](#credenciales-de-acceso)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Tecnologías Utilizadas](#tecnologías-utilizadas)
+## Quick summary
 
----
+- Repository name: EmployeeManagementSystem
+- Web (Admin MVC): http://localhost/ (port 80)
+- API: http://localhost:5000
+- Swagger: http://localhost:5000/swagger
+- PgAdmin: http://localhost:8080
+- PostgreSQL: localhost:5432
 
-## ✨ Características
+> These URLs assume you run the provided Docker Compose. If you changed ports in `compose.yaml` or your environment, use the mapped ports shown by `docker compose ps`.
 
-### Aplicación Web (MVC)
-- ✅ **Dashboard interactivo** con métricas en tiempo real
-- ✅ **Asistente de IA** para consultas en lenguaje natural (Gemini)
-- ✅ **CRUD completo** de empleados
-- ✅ **Importación masiva** desde archivos Excel
-- ✅ **Generación de PDFs** con hojas de vida
-- ✅ **Autenticación** con ASP.NET Core Identity
+## What is included
 
-### API REST
-- ✅ **Autoregistro público** de empleados
-- ✅ **Autenticación JWT** para empleados
-- ✅ **Endpoints protegidos** para consulta de información personal
-- ✅ **Descarga de CV** en PDF
-- ✅ **Importación de Excel**
-- ✅ **CRUD completo** de empleados (admin)
-- ✅ **Swagger/OpenAPI** con autenticación JWT integrada
+- EmployeeManagementSystem.Api — REST API (JWT protected endpoints)
+- EmployeeManagementSystem.Web — MVC admin interface (ASP.NET Core Identity)
+- EmployeeManagementSystem.Infrastructure — EF Core, migrations, repositories and services
+- PostgreSQL and PgAdmin running via Docker Compose
+- Excel import and PDF generation features
+- Tests project with unit and integration tests
 
-### Funcionalidades Clave
-- ✅ **Envío automático de correos** de bienvenida (Gmail SMTP)
-- ✅ **Importación inteligente** desde Excel (columnas en español)
-- ✅ **Creación automática** de departamentos y cargos
-- ✅ **Generación profesional** de hojas de vida en PDF (QuestPDF)
-- ✅ **Consultas de IA** sobre datos de empleados (Gemini AI)
+## Prerequisites
 
----
+- .NET 8.0 SDK (for local development)
+- Docker and Docker Compose (v2 recommended — command: `docker compose`)
+- Git
 
-## 🏗️ Arquitectura
+## Run with Docker Compose (recommended)
 
-El proyecto sigue los principios de **Clean Architecture** con las siguientes capas:
+1. From repository root:
 
-```
-├── EmployeeManagementSystem.Domain        # Entidades, Value Objects, Enums
-├── EmployeeManagementSystem.Application   # DTOs, Interfaces, Servicios, Validadores
-├── EmployeeManagementSystem.Infrastructure # Repositorios, EF Core, Servicios externos
-├── EmployeeManagementSystem.Api           # API REST con JWT
-├── EmployeeManagementSystem.Web           # Aplicación MVC (Admin)
-└── EmployeeManagementSystem.Tests         # Pruebas unitarias e integración
-```
+    docker compose up --build -d
 
-### Patrones Implementados
-- ✅ Repository Pattern
-- ✅ Dependency Injection
-- ✅ CQRS (Command Query Responsibility Segregation)
-- ✅ Value Objects
-- ✅ Domain-Driven Design (DDD)
+2. Check running services and ports:
 
----
+    docker compose ps
 
-## 📦 Requisitos Previos
+3. Visit the services:
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Docker](https://www.docker.com/get-started) y [Docker Compose](https://docs.docker.com/compose/install/)
-- [PostgreSQL 16](https://www.postgresql.org/download/) (opcional, se levanta con Docker)
-- [Git](https://git-scm.com/)
+- Web (Admin): http://localhost/ or http://localhost:80
+- API: http://localhost:5000
+- Swagger UI: http://localhost:5000/swagger
+- PgAdmin: http://localhost:8080
 
----
+If a port is already used on your machine, change the ports in `compose.yaml` before `docker compose up` or stop the conflicting service.
 
-## ⚙️ Instalación y Configuración
+## Environment variables (overview)
 
-### 1. Clonar el repositorio
+The project reads sensitive values from environment variables. Typical variables used are:
 
-```bash
-git clone <URL_DEL_REPOSITORIO>
-cd EmployeeManagementSystem
-```
+- Database:
+  - POSTGRES_DB
+  - POSTGRES_USER
+  - POSTGRES_PASSWORD
+  - PG_PORT
 
-### 2. Configurar Variables de Entorno
+- JWT:
+  - JWT__Key
+  - JWT__Issuer
+  - JWT__Audience
+  - JWT__ExpiryMinutes
 
-El archivo `.env` ya está configurado con valores por defecto. **NO modificar a menos que sea necesario**.
+- Email (SMTP):
+  - EmailSettings__SmtpServer
+  - EmailSettings__SmtpPort
+  - EmailSettings__SenderEmail
+  - EmailSettings__Password
 
-```env
-# Base de Datos
-POSTGRES_DB=TalentoPlusDB
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=niko
-PG_PORT=5432
+- AI (optional):
+  - AISettings__ApiKey
+  - AISettings__Model
 
-# JWT
-JWT__Key=lu34CLysz31gQwSvh9XgT1q5QoOjIovEu1YlJQZyB5Qo4qUGcuZztxybdjwJgF2d
-JWT__Issuer=TalentoPlusAPI
-JWT__Audience=TalentoPlusClient
-JWT__ExpiryMinutes=15
+If you use Docker Compose, these values are normally configured in an `.env` file or directly in `compose.yaml`. Do not commit secrets into source control.
 
-# Email (Gmail)
-EmailSettings__SmtpServer=smtp.gmail.com
-EmailSettings__SmtpPort=587
-EmailSettings__SenderEmail=velasqueznikol10@gmail.com
-EmailSettings__Password=dxvo xvlv pdtm yoxv
+## Default credentials (development)
 
-# IA (Gemini)
-AISettings__ApiKey=AIzaSyCXgQbSQeFABXYnxYXCtrbM7o-UXSJTFws
-AISettings__Model=gemini-2.0-flash-exp
-```
+- Admin web (MVC):
+  - Email: admin@talentoplus.com
+  - Password: Admin123!
 
----
+- PgAdmin default (if configured like this in compose):
+  - Email: admin@talentoplus.com
+  - Password: admin123
 
-## 🐳 Ejecución con Docker
+Use the admin account to log into the MVC admin site and to get admin-level JWTs via the API if needed.
 
-### Levantar toda la solución
+## Common troubleshooting — Swagger shows token OK but front-end gets "Unauthorized"
 
-```bash
-docker-compose up --build
-```
+If Swagger allows you to Authorize with a JWT and your API endpoints work there, but the Web front-end reports "Unauthorized" or login fails with "Invalid login attempt", check the following areas:
 
-Esto levantará:
-- **PostgreSQL** en el puerto `5432`
-- **PgAdmin** en `http://localhost:8080`
-- **API REST** en `http://localhost:5000`
-- **Aplicación Web** en `http://localhost:80`
+1. CORS and endpoints
+   - Ensure the API has CORS configured to allow the front-end origin (for default Docker Compose both are on localhost but different ports; configure allowed origins accordingly).
+   - Example: allow `http://localhost` and `http://localhost:80` if the MVC app calls the API from the browser.
 
-### Acceder a los servicios
+2. Authorization header
+   - The front-end must send the header exactly as `Authorization: Bearer {token}` (no extra quotes or spaces).
+   - When using fetch/Axios, ensure the header is set and not blocked by the browser due to CORS preflight.
 
-| Servicio | URL | Descripción |
-|----------|-----|-------------|
-| Aplicación Web | http://localhost:80 | Portal del administrador |
-| API REST | http://localhost:5000 | Endpoints REST |
-| Swagger UI | http://localhost:5000/swagger | Documentación interactiva |
-| PgAdmin | http://localhost:8080 | Administrador de BD |
+3. Cookie vs Bearer token confusion
+   - The MVC Admin uses ASP.NET Core Identity cookies; the API uses JWT Bearer tokens. These are separate authentication schemes.
+   - If the front-end is an SPA or makes direct AJAX calls to the API, you must attach the JWT to each request.
+   - If you rely on cookies, verify the cookie domain/path and that cookies are forwarded in requests (withCredentials=true) and that the API expects cookie authentication.
 
-### Aplicar migraciones (automático)
+4. JWT Issuer/Audience/Clock skew/Expiry
+   - Ensure `JWT__Issuer` and `JWT__Audience` used by the front-end (or created by the login endpoint) match the API configuration.
+   - Check token expiry. Try issuing a fresh token and using it immediately.
+   - Check system time in containers; large time skew can make tokens invalid.
 
-Las migraciones se aplican automáticamente al iniciar la aplicación. El sistema también crea:
-- ✅ Departamentos iniciales
-- ✅ Cargos (JobPositions) iniciales
-- ✅ Usuario administrador por defecto
+5. Development vs Production settings
+   - In Development the appsettings.Development.json and environment variables may be different; verify which configuration is loaded inside the running container.
 
----
+6. Inspect logs
+   - Check API logs for authentication errors. Example:
 
-## 🔐 Credenciales de Acceso
+       docker compose logs api --tail 200
 
-### Aplicación Web (Administrador)
-```
-Usuario: admin@talentoplus.com
-Contraseña: Admin123!
-```
+   - Look for messages from Microsoft.AspNetCore.Authentication indicating why the token was rejected.
 
-### PgAdmin
-```
-Email: admin@talentoplus.com
-Contraseña: admin123
-```
+7. Swagger vs browser difference
+   - Swagger sends the Authorization header directly to the API. The browser front-end may be subject to CORS preflight and not actually send the header if the server rejects preflight or lacks Access-Control-Allow-Headers for Authorization.
+   - Ensure the API allows the `Authorization` header in CORS: Access-Control-Allow-Headers: Authorization, Content-Type
 
-### API REST (JWT)
-Para obtener un token JWT, hacer POST a `/api/auth/login`:
-```json
-{
-  "email": "admin@talentoplus.com",
-  "password": "Admin123!"
-}
-```
+If you'd like, I can make a minimal checklist of exact config lines (`Program.cs`/CORS and JWT options) to add — but you asked not to change more files than necessary. First check the logs and CORS config.
 
----
+## Database migrations
 
-## 📡 Endpoints de la API
+- Migrations are configured in `EmployeeManagementSystem.Infrastructure` and usually applied on application startup inside the API and/or web projects.
+- If migrations are not applied, run locally:
 
-### Públicos (sin autenticación)
+    dotnet ef database update --project EmployeeManagementSystem.Infrastructure --startup-project EmployeeManagementSystem.Api
 
-#### Autenticación
-```http
-POST /api/auth/login
-Content-Type: application/json
+Or rely on Docker startup which runs migrations automatically if that behavior is enabled.
 
-{
-  "email": "empleado@correo.com",
-  "password": "documento"
-}
-```
+If you want to reset database state in Docker:
 
-#### Autoregistro de Empleado
-```http
-POST /api/employees/register
-Content-Type: application/json
+    docker compose down -v
+    docker compose up --build -d
 
-{
-  "document": "123456789",
-  "firstName": "Juan",
-  "lastName": "Pérez",
-  "birthDate": "1990-01-01",
-  "address": "Calle 123",
-  "email": "juan.perez@correo.com",
-  "phone": "3001234567",
-  "jobPositionId": 1,
-  "salary": 3000000,
-  "hiringDate": "2024-01-01",
-  "status": 0,
-  "educationLevel": 3,
-  "professionalProfile": "Profesional en sistemas",
-  "departmentId": 1
-}
-```
+This removes volumes and recreates the database (data will be lost).
 
-#### Listar Departamentos
-```http
-GET /api/departments
-```
+## Running tests
 
-### Protegidos (requieren JWT)
+Run the test suite locally with dotnet:
 
-#### Información del Empleado Autenticado
-```http
-GET /api/employees/me
-Authorization: Bearer {token}
-```
+    dotnet test
 
-#### Descargar CV del Empleado
-```http
-GET /api/employees/me/cv
-Authorization: Bearer {token}
-```
+You can filter unit vs integration tests using dotnet test filters if the solution uses test categories.
 
-### Administración (requieren autenticación)
+## Useful Docker commands
 
-#### Listar Todos los Empleados
-```http
-GET /api/employees
-Authorization: Bearer {token}
-```
+- Start in detached mode:
 
-#### Obtener Empleado por ID
-```http
-GET /api/employees/{id}
-Authorization: Bearer {token}
-```
+    docker compose up --build -d
 
-#### Actualizar Empleado
-```http
-PUT /api/employees/{id}
-Authorization: Bearer {token}
-Content-Type: application/json
-```
+- View service status and port mappings:
 
-#### Eliminar Empleado
-```http
-DELETE /api/employees/{id}
-Authorization: Bearer {token}
-```
+    docker compose ps
 
-#### Importar desde Excel
-```http
-POST /api/employees/import-excel
-Authorization: Bearer {token}
-Content-Type: multipart/form-data
+- View logs for a service (api, web, db, pgadmin):
 
-file: [archivo.xlsx]
-```
+    docker compose logs api --follow
 
-#### Generar PDF de Empleado
-```http
-GET /api/employees/{id}/cv
-Authorization: Bearer {token}
-```
+- Stop and remove containers (optionally remove volumes):
+
+    docker compose down
+
+## If login still fails
+
+1. Copy the exact error message from the API logs and I will inspect.
+2. Confirm whether the failing login is: MVC admin sign-in (Identity cookie) or API login (Returns JWT). They are different flows.
+3. If the issue is migrations (no admin user created), check data seeder logs; you can create the admin user manually with a minimal script or SQL insert.
+
+## Contact / Next steps I can help with
+
+- I can update `compose.yaml` ports if current mappings conflict on your machine.
+- I can provide the exact minimal CORS and JWT configuration lines to add to `Program.cs` to fix the Swagger vs front-end issue.
+- I can produce a short troubleshooting script to collect logs and token payload for debugging.
+
+If you want the README to include additional specifics (exact env file example, or the exact Program.cs snippets to add for CORS/JWT), tell me and I will add them.
 
 ---
 
-## 📂 Estructura del Proyecto
-
-```
-EmployeeManagementSystem/
-│
-├── EmployeeManagementSystem.Domain/
-│   ├── Entities/           # Employee, Department, JobPosition
-│   ├── ValueObjects/       # FullName, ContactInfo, JobInfo, EducationInfo
-│   ├── Enums/              # EmployeeStatus, EducationLevel
-│   ├── Interfaces/         # IEmployeeRepository, IDepartmentRepository
-│   └── Exceptions/         # Custom exceptions
-│
-├── EmployeeManagementSystem.Application/
-│   ├── DTOs/               # CreateEmployeeDto, EmployeeDto, LoginDto
-│   ├── Interfaces/         # IEmployeeService, IAuthService, IAIService
-│   ├── Services/           # EmployeeService
-│   └── Validators/         # FluentValidation validators
-│
-├── EmployeeManagementSystem.Infrastructure/
-│   ├── Data/               # ApplicationDbContext, DataSeeder
-│   ├── Repositories/       # EmployeeRepository, DepartmentRepository
-│   ├── Services/           # AuthService, EmailService, PdfService, ExcelService, GeminiAIService
-│   ├── Identity/           # ApplicationUser
-│   ├── Persistence/        # Entity configurations
-│   └── Migrations/         # EF Core migrations
-│
-├── EmployeeManagementSystem.Api/
-│   ├── Controllers/        # AuthController, EmployeesController, DepartmentsController
-│   └── Program.cs
-│
-├── EmployeeManagementSystem.Web/
-│   ├── Controllers/        # AccountController, DashboardController, EmployeesController
-│   ├── Views/              # Login, Dashboard, Employees (CRUD)
-│   ├── Models/             # ViewModels
-│   └── Program.cs
-│
-├── EmployeeManagementSystem.Tests/
-│   ├── UnitTests/
-│   └── IntegrationTests/
-│
-├── compose.yaml            # Docker Compose configuration
-├── .env                    # Environment variables
-└── README.md              # Este archivo
-```
-
----
-
-## 🛠️ Tecnologías Utilizadas
-
-### Backend
-- **ASP.NET Core 8.0** - Framework principal
-- **Entity Framework Core 8.0** - ORM
-- **PostgreSQL** - Base de datos
-- **ASP.NET Core Identity** - Autenticación y autorización
-- **JWT (JSON Web Tokens)** - Autenticación API
-
-### Librerías y Servicios
-- **FluentValidation** - Validaciones
-- **AutoMapper** - Mapeo de objetos
-- **QuestPDF** - Generación de PDFs
-- **EPPlus** - Lectura/escritura de Excel
-- **MailKit** - Envío de correos
-- **Google Gemini AI** - Inteligencia artificial
-- **Swagger/OpenAPI** - Documentación API
-
-### Frontend
-- **Bootstrap 5** - Framework CSS
-- **jQuery** - Manipulación DOM
-- **Font Awesome** - Iconos
-
-### DevOps
-- **Docker** - Contenedores
-- **Docker Compose** - Orquestación
-
-### Testing
-- **xUnit** - Framework de testing
-- **FluentAssertions** - Assertions expresivas
-- **Moq** - Mocking framework
-- **Microsoft.AspNetCore.Mvc.Testing** - Testing de APIs
-
----
-
-## 🧪 Tests Automatizados
-
-El sistema cuenta con una **suite completa de 77 tests** que garantizan la calidad del código:
-
-### Resumen de Tests
-- **Total:** 77 tests
-- **Tests Unitarios:** 66
-- **Tests de Integración:** 11
-- **Cobertura:** Dominio, Aplicación, Infraestructura y API
-- **Estado:** ✅ 100% pasando
-
-### Ejecutar Tests
-
-```bash
-# Ejecutar todos los tests
-dotnet test
-
-# Ejecutar solo tests unitarios
-dotnet test --filter "FullyQualifiedName~UnitTests"
-
-# Ejecutar solo tests de integración
-dotnet test --filter "FullyQualifiedName~IntegrationTests"
-```
-
-### Scripts con Validación de Tests
-
-El sistema incluye scripts que **validan los tests antes de iniciar** la aplicación. Si algún test falla, la aplicación no arranca:
-
-```bash
-# Iniciar API (con validación de tests)
-./start-api.sh
-
-# Iniciar Web (con validación de tests)
-./start-web.sh
-```
-
-Para más detalles sobre los tests, ver [TESTS_RESUMEN.md](TESTS_RESUMEN.md)
-
----
-
-## 📊 Características del Excel de Importación
-
-El sistema puede importar empleados desde archivos Excel con las siguientes columnas (en español):
-
-| Columna | Valores Permitidos |
-|---------|-------------------|
-| Documento | Texto |
-| Nombres | Texto |
-| Apellidos | Texto |
-| Fecha de Nacimiento | Fecha |
-| Dirección | Texto |
-| Correo / Email | Email válido |
-| Teléfono | Texto |
-| Cargo | Texto (se crea si no existe) |
-| Departamento | Texto (se crea si no existe) |
-| Salario | Número |
-| Fecha de Ingreso | Fecha |
-| Estado | Activo / Inactivo / Vacaciones |
-| Nivel Educativo | Bachiller / Técnico / Tecnólogo / Profesional / Especialización / Maestría / Doctorado |
-| Perfil Profesional | Texto |
-
----
-
-## 🧪 Pruebas
-
-### Ejecutar todas las pruebas
-```bash
-dotnet test
-```
-
-### Ejecutar pruebas específicas
-```bash
-dotnet test --filter "FullyQualifiedName~EmployeeServiceTests"
-```
-
----
-
-## 📝 Notas Adicionales
-
-### Niveles Educativos Soportados
-1. **Bachiller** (HighSchool)
-2. **Técnico** (Technical)
-3. **Tecnólogo** (Technologist)
-4. **Profesional** (Professional)
-5. **Especialización** (Specialization)
-6. **Maestría** (Master)
-7. **Doctorado** (Doctorate)
-
-### Estados de Empleado
-- **Active** (Activo)
-- **Inactive** (Inactivo)
-- **Vacation** (Vacaciones)
-
----
-
-## 📧 Contacto y Soporte
-
-Para preguntas o problemas, contactar a:
-- **Email**: velasqueznikol10@gmail.com
-
----
-
-## 📄 Licencia
-
-Este proyecto fue desarrollado como prueba técnica para TalentoPlus S.A.S.
-
----
-
-**Desarrollado con ❤️ usando Clean Architecture y .NET 8.0**
-
+Thank you — if you confirm this README is good, I will save it. If you prefer extra troubleshooting lines or a sample `.env` section, I will add it next.
